@@ -2,7 +2,7 @@
 
 在游戏里看中英对照。遇到没读懂的台词或规则，按 **F8** 搜原句，点词看释义，再回到游戏。
 
-**[下载 Windows x64 便携包](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/download/v0.11.2/BilingualGameWorkbench-0.11.2-Windows-x64.zip)** · Windows 10/11 · [发行页](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/latest)
+**[下载 Windows x64 便携包](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/download/v0.11.2/BilingualGameWorkbench-0.11.2-Windows-x64.zip)** · Windows 10/11 · [发行页](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/latest) · [参与贡献](#参与贡献)
 
 > **初期试验阶段** · 适配效果会随游戏版本、语言资源和界面布局变化。遇到问题请多多包涵。欢迎在 [Issues](https://github.com/iaoq21699-sys/bilingual-game-workbench/issues) 留下游戏版本和复现步骤。
 
@@ -55,6 +55,15 @@
 
 - [用 GPT 做双语语料、审校和面板布局](docs/gpt-workflow.md)
 - [从源码运行、构建插件与打包](docs/build.md)
-- [第三方组件来源与许可](docs/THIRD_PARTY.txt)
 
 检索与笔记保存在本机。使用游戏内的「记到笔记」可以收藏词、词组或整句，再到工作台复习。
+
+## 参与贡献
+
+欢迎大家提 PR 一起完善工作台。修复问题、补充游戏适配、改善界面和文档都欢迎。Fork 后在自己的分支提交改动，再向本仓库的 `main` 提交 Pull Request。附上改动说明和验证步骤，方便一起复现和讨论。[查看 Pull Requests](https://github.com/iaoq21699-sys/bilingual-game-workbench/pulls)
+
+## 许可证
+
+本项目代码采用 MIT 许可证。你可以修改代码并发布改进版，分发时请保留原版权与许可声明。[MIT 许可证](LICENSE)
+
+第三方组件遵循各自的许可。游戏截图及其中的游戏内容归各自权利人。[第三方组件来源与许可](docs/THIRD_PARTY.txt)

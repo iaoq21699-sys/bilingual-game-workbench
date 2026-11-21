@@ -17,7 +17,7 @@ import zipfile
 
 PROJECT = Path(__file__).resolve().parents[1]
 REQUIRED = (
-    "main.py", "launch.cmd", "scripts/package.py", "scripts/native_panel.py", "docs/THIRD_PARTY.txt",
+    "LICENSE", "main.py", "launch.cmd", "scripts/package.py", "scripts/native_panel.py", "docs/THIRD_PARTY.txt",
     "tools/repak.exe", "tools/retoc.exe", "tools/repak-LICENSE-MIT",
     "tools/repak-LICENSE-APACHE", "tools/retoc-LICENSE",
 )

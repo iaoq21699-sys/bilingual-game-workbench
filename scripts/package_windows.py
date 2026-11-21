@@ -21,7 +21,7 @@ PYTHON_ROOT_FILES = {
 PYTHON_TREES = {"DLLs", "Lib", "tcl"}
 PYTHON_OMIT = {"__pycache__", "ensurepip", "site-packages", "test", "tests"}
 PORTABLE_ROOT_AND_SCRIPTS = {
-    "main.py", "launch.cmd", "启动诊断.cmd", "prepare-native-panel.cmd", "README.md",
+    "LICENSE", "main.py", "launch.cmd", "启动诊断.cmd", "prepare-native-panel.cmd", "README.md",
     "START-HERE.txt", NATIVE_ADDON, "native/README.txt", "native/vendor/README.txt",
     "scripts/native_panel.py", "scripts/prepare_reshade.py",
 }
