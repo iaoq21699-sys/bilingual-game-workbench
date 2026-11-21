@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "title": "格式示例（非游戏原文）",
+  "entries": [
+    {
+      "key": "tutorial.first_step",
+      "namespace": "tutorial",
+      "category": "教程",
+      "en": "Keep an eye on your oxygen level.",
+      "zh": "留意你的氧气量。",
+      "note": "此条是格式示例，并非从游戏提取。",
+      "phrases": [
+        {"term": "keep an eye on", "meaning": "留意；持续关注", "source": "示例注释"}
+      ]
+    }
+  ]
+}

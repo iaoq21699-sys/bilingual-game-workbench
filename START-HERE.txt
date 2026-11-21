@@ -1,0 +1,11 @@
+双语游戏工作台 · Windows x64 便携版
+
+1. 完整解压，将整个文件夹放到可写位置。
+2. 双击 launch.cmd。界面打开后，在「资料 → 导入文本」导入
+   examples\bilingual.json，搜索 oxygen 或 氧气，即可试用。
+3. 接入游戏请看 docs\onboarding.md。兼容 DirectX 游戏首次使用内置
+   面板时，先双击 prepare-native-panel.cmd 获取匹配的官网 ReShade 运行库。
+4. 找不到窗口时，可运行 启动诊断.cmd 并查看 logs\workbench.log。
+
+双语资源可用「游戏 → 恢复原版显示」恢复，游戏内面板独立移除。
+完整接入步骤、技术范围和使用说明见 README.md 和 docs。

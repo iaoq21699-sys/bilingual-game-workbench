@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+/data/
+/logs/
+/dist/
+/runtime/
+/native/build/
+/tools/reshade-runtime/
+/tools/oo2core*.dll
+/output/
+/.bilingual-workbench/

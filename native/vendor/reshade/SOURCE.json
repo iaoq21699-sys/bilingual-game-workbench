@@ -1,0 +1,9 @@
+{
+  "version": "6.8.0",
+  "tag": "v6.8.0",
+  "commit": "18deaa52de0c425a78b329e9cb3c497281cd00ec",
+  "url": "https://codeload.github.com/crosire/reshade/zip/refs/tags/v6.8.0",
+  "sha256": "936d3e9cc0506f16e635266299f43a6b9db49023af1573fae572195506e5b764",
+  "api_version": 20,
+  "imgui_version_num": 19250
+}

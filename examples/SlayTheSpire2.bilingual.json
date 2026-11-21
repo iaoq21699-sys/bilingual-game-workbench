@@ -1,0 +1,334 @@
+{
+  "engine": "godot",
+  "title": "杀戮尖塔 2",
+  "executables": [
+    "SlayTheSpire2.exe"
+  ],
+  "pairs": [
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/achievements.json",
+      "source": "localization/eng/achievements.json",
+      "target": "localization/zhs/achievements.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/acts.json",
+      "source": "localization/eng/acts.json",
+      "target": "localization/zhs/acts.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/afflictions.json",
+      "source": "localization/eng/afflictions.json",
+      "target": "localization/zhs/afflictions.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/ancients.json",
+      "source": "localization/eng/ancients.json",
+      "target": "localization/zhs/ancients.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/ascension.json",
+      "source": "localization/eng/ascension.json",
+      "target": "localization/zhs/ascension.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/badges.json",
+      "source": "localization/eng/badges.json",
+      "target": "localization/zhs/badges.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/bestiary.json",
+      "source": "localization/eng/bestiary.json",
+      "target": "localization/zhs/bestiary.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/card_keywords.json",
+      "source": "localization/eng/card_keywords.json",
+      "target": "localization/zhs/card_keywords.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/card_library.json",
+      "source": "localization/eng/card_library.json",
+      "target": "localization/zhs/card_library.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/card_reward_ui.json",
+      "source": "localization/eng/card_reward_ui.json",
+      "target": "localization/zhs/card_reward_ui.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/card_selection.json",
+      "source": "localization/eng/card_selection.json",
+      "target": "localization/zhs/card_selection.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/cards.json",
+      "source": "localization/eng/cards.json",
+      "target": "localization/zhs/cards.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/characters.json",
+      "source": "localization/eng/characters.json",
+      "target": "localization/zhs/characters.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/combat_messages.json",
+      "source": "localization/eng/combat_messages.json",
+      "target": "localization/zhs/combat_messages.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/credits.json",
+      "source": "localization/eng/credits.json",
+      "target": "localization/zhs/credits.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/enchantments.json",
+      "source": "localization/eng/enchantments.json",
+      "target": "localization/zhs/enchantments.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/encounters.json",
+      "source": "localization/eng/encounters.json",
+      "target": "localization/zhs/encounters.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/epochs.json",
+      "source": "localization/eng/epochs.json",
+      "target": "localization/zhs/epochs.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/eras.json",
+      "source": "localization/eng/eras.json",
+      "target": "localization/zhs/eras.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/events.json",
+      "source": "localization/eng/events.json",
+      "target": "localization/zhs/events.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/extensions.json",
+      "source": "localization/eng/extensions.json",
+      "target": "localization/zhs/extensions.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/ftues.json",
+      "source": "localization/eng/ftues.json",
+      "target": "localization/zhs/ftues.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/game_modes.json",
+      "source": "localization/eng/game_modes.json",
+      "target": "localization/zhs/game_modes.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/game_over_screen.json",
+      "source": "localization/eng/game_over_screen.json",
+      "target": "localization/zhs/game_over_screen.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/gameplay_ui.json",
+      "source": "localization/eng/gameplay_ui.json",
+      "target": "localization/zhs/gameplay_ui.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/inspect_relic_screen.json",
+      "source": "localization/eng/inspect_relic_screen.json",
+      "target": "localization/zhs/inspect_relic_screen.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/intents.json",
+      "source": "localization/eng/intents.json",
+      "target": "localization/zhs/intents.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/main_menu_ui.json",
+      "source": "localization/eng/main_menu_ui.json",
+      "target": "localization/zhs/main_menu_ui.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/map.json",
+      "source": "localization/eng/map.json",
+      "target": "localization/zhs/map.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/merchant_room.json",
+      "source": "localization/eng/merchant_room.json",
+      "target": "localization/zhs/merchant_room.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/modifiers.json",
+      "source": "localization/eng/modifiers.json",
+      "target": "localization/zhs/modifiers.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/monsters.json",
+      "source": "localization/eng/monsters.json",
+      "target": "localization/zhs/monsters.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/orbs.json",
+      "source": "localization/eng/orbs.json",
+      "target": "localization/zhs/orbs.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/potion_lab.json",
+      "source": "localization/eng/potion_lab.json",
+      "target": "localization/zhs/potion_lab.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/potions.json",
+      "source": "localization/eng/potions.json",
+      "target": "localization/zhs/potions.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/powers.json",
+      "source": "localization/eng/powers.json",
+      "target": "localization/zhs/powers.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/relic_collection.json",
+      "source": "localization/eng/relic_collection.json",
+      "target": "localization/zhs/relic_collection.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/relics.json",
+      "source": "localization/eng/relics.json",
+      "target": "localization/zhs/relics.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/rest_site_ui.json",
+      "source": "localization/eng/rest_site_ui.json",
+      "target": "localization/zhs/rest_site_ui.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/rich_presence.json",
+      "source": "localization/eng/rich_presence.json",
+      "target": "localization/zhs/rich_presence.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/run_history.json",
+      "source": "localization/eng/run_history.json",
+      "target": "localization/zhs/run_history.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/settings_ui.json",
+      "source": "localization/eng/settings_ui.json",
+      "target": "localization/zhs/settings_ui.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/static_hover_tips.json",
+      "source": "localization/eng/static_hover_tips.json",
+      "target": "localization/zhs/static_hover_tips.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/stats_screen.json",
+      "source": "localization/eng/stats_screen.json",
+      "target": "localization/zhs/stats_screen.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/timeline.json",
+      "source": "localization/eng/timeline.json",
+      "target": "localization/zhs/timeline.json"
+    },
+    {
+      "pack": "SlayTheSpire2.pck",
+      "table": "localization/{locale}/vfx.json",
+      "source": "localization/eng/vfx.json",
+      "target": "localization/zhs/vfx.json"
+    }
+  ],
+  "source_locale": "eng",
+  "target_locale": "zhs",
+  "options": {
+    "loader": "sts2",
+    "mod_id": "BilingualWorkbench",
+    "mod_directory": "mods/BilingualWorkbench",
+    "resource_prefix": "BilingualWorkbench",
+    "write_locales": [
+      "eng",
+      "zhs"
+    ],
+    "separator": "\n",
+    "layout": "auto",
+    "order": "zh-en",
+    "on_mismatch": "preserve"
+  },
+  "details": {
+    "packs": [
+      {
+        "path": "SlayTheSpire2.pck",
+        "format": 3,
+        "engine_version": [
+          4,
+          5,
+          1
+        ],
+        "resources": 15889
+      }
+    ],
+    "release": {
+      "commit": "58694f64",
+      "version": "v0.108.0",
+      "date": "2026-07-02T20:04:20-07:00",
+      "branch": "v0.108.0",
+      "main_assembly_hash": 1975580652
+    },
+    "pair_count": 46,
+    "native_loader_known": true,
+    "format_reference": "https://github.com/godotengine/godot/blob/4.5/core/io/file_access_pack.cpp",
+    "loader_reference": "https://github.com/Alchyr/ModTemplate-StS2/wiki/Modding-Basics"
+  },
+  "warnings": [
+    "首次启用模组可能需要游戏内确认；游戏区分模组与原版存档，显示效果需进游戏检查。"
+  ],
+  "executable": "SlayTheSpire2.exe",
+  "window_executable": "SlayTheSpire2.exe",
+  "launch_args": [],
+  "schema_version": 1,
+  "root": "."
+}

@@ -1,0 +1,26 @@
+第三方组件及来源
+
+CPython / Tcl/Tk
+便携版使用 Astral Python Build Standalone 的 CPython 3.13.18 Windows x64 构建。
+上游 https://github.com/astral-sh/python-build-standalone/releases/tag/20261110
+原始归档 SHA-256
+2e0fed09d48989f64c9305da9ff2d37a41c0d13ab2aa6283405b2b620dfbf805
+运行时许可与声明位于便携包 runtime 下，包含 CPython 与其构建所用依赖的许可。
+
+Unreal 资源工具
+repak_cli 0.2.3 https://github.com/trumank/repak/releases/tag/v0.2.3
+Apache-2.0 或 MIT。许可证文件位于 tools。
+retoc_cli 0.1.5 https://github.com/trumank/retoc/releases/tag/v0.1.5
+MIT。许可证文件位于 tools。
+
+原生面板源码依赖
+ReShade SDK 6.8.0、Dear ImGui 1.92.5-docking 与 SQLite 3.54.1。
+具体来源、版本和许可证位于 native/vendor。
+ReShade Full Add-on 6.8.0 运行库由使用者从 https://reshade.me/ 获取。
+便携包可运行 prepare-native-panel.cmd 从同一官网获取并校验。
+便携构建附带 native/vendor 下适用的许可副本。
+
+可选本机资料
+兼容 ECDICT CSV https://github.com/skywind3000/ECDICT
+部分 Unreal 游戏依赖使用者有权使用的 Oodle 组件。
+使用相关游戏文字、字体和存档时遵循游戏及素材的授权。

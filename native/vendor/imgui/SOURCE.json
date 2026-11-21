@@ -1,0 +1,16 @@
+{
+  "version": "1.92.5",
+  "tag": "v1.92.5-docking",
+  "version_num": 19250,
+  "reshade_submodule_commit": "3912b3d9a9c1b3f17431aebafd86d2f40ee6e59c",
+  "submodule_header_verification": "imgui.h byte-identical to the fixed ReShade 6.8.0 submodule; 450012 bytes; matching SHA-256 below",
+  "repository": "https://github.com/ocornut/imgui/tree/v1.92.5-docking",
+  "files_url": "https://raw.githubusercontent.com/ocornut/imgui/v1.92.5-docking/",
+  "license": "MIT; LICENSE.txt",
+  "usage": "Headers only, docking branch. Required by ReShade 6.8.0 imgui_function_table_19250; do not compile or link an independent ImGui implementation.",
+  "file_sha256": {
+    "imgui.h": "07562842049eaca4e47c3fcdcc9d8eafd442695b9856d6f6639e92e1bb6c737e",
+    "imconfig.h": "6e5687893594ebfaf8569280cfea83d025904a8a4e23bec073086f6c5bc8f7fb",
+    "LICENSE.txt": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+  }
+}

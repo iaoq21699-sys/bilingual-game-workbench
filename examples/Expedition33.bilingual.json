@@ -1,0 +1,114 @@
+{
+  "engine": "unreal",
+  "title": "光与影：33号远征队",
+  "executables": [
+    "Expedition33_Steam.exe",
+    "Sandfall/Binaries/Win64/SandFall-Win64-Shipping.exe"
+  ],
+  "launch_args": [
+    "-culture=zh-Hans"
+  ],
+  "window_executable": "Sandfall/Binaries/Win64/SandFall-Win64-Shipping.exe",
+  "pairs": [
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Engine/Content/Localization/Engine/en/Engine.locres",
+      "chinese": "Engine/Content/Localization/Engine/zh-Hans/Engine.locres",
+      "target": "Engine/Content/Localization/Engine/zh-Hans/Engine.locres",
+      "namespace": "Engine",
+      "source_locale": "en",
+      "target_locale": "zh-Hans"
+    },
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Engine/Plugins/Marketplace/XeSS/Content/Localization/XeSS/en/XeSS.locres",
+      "chinese": "Engine/Plugins/Marketplace/XeSS/Content/Localization/XeSS/zh-Hans/XeSS.locres",
+      "target": "Engine/Plugins/Marketplace/XeSS/Content/Localization/XeSS/zh-Hans/XeSS.locres",
+      "namespace": "XeSS",
+      "source_locale": "en",
+      "target_locale": "zh-Hans"
+    },
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Engine/Plugins/Online/OnlineSubsystem/Content/Localization/OnlineSubsystem/en/OnlineSubsystem.locres",
+      "chinese": "Engine/Plugins/Online/OnlineSubsystem/Content/Localization/OnlineSubsystem/zh-Hans/OnlineSubsystem.locres",
+      "target": "Engine/Plugins/Online/OnlineSubsystem/Content/Localization/OnlineSubsystem/zh-Hans/OnlineSubsystem.locres",
+      "namespace": "OnlineSubsystem",
+      "source_locale": "en",
+      "target_locale": "zh-Hans"
+    },
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Engine/Plugins/Online/OnlineSubsystemSteam/Content/Localization/OnlineSubsystemSteam/en/OnlineSubsystemSteam.locres",
+      "chinese": "Engine/Plugins/Online/OnlineSubsystemSteam/Content/Localization/OnlineSubsystemSteam/zh-Hans/OnlineSubsystemSteam.locres",
+      "target": "Engine/Plugins/Online/OnlineSubsystemSteam/Content/Localization/OnlineSubsystemSteam/zh-Hans/OnlineSubsystemSteam.locres",
+      "namespace": "OnlineSubsystemSteam",
+      "source_locale": "en",
+      "target_locale": "zh-Hans"
+    },
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Engine/Plugins/Online/OnlineSubsystemUtils/Content/Localization/OnlineSubsystemUtils/en/OnlineSubsystemUtils.locres",
+      "chinese": "Engine/Plugins/Online/OnlineSubsystemUtils/Content/Localization/OnlineSubsystemUtils/zh-Hans/OnlineSubsystemUtils.locres",
+      "target": "Engine/Plugins/Online/OnlineSubsystemUtils/Content/Localization/OnlineSubsystemUtils/zh-Hans/OnlineSubsystemUtils.locres",
+      "namespace": "OnlineSubsystemUtils",
+      "source_locale": "en",
+      "target_locale": "zh-Hans"
+    },
+    {
+      "archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "chinese_archive": "Sandfall/Content/Paks/pakchunk0-Windows.pak",
+      "english": "Sandfall/Content/Localization/Game/en-US/Game.locres",
+      "chinese": "Sandfall/Content/Localization/Game/zh-Hans/Game.locres",
+      "target": "Sandfall/Content/Localization/Game/zh-Hans/Game.locres",
+      "namespace": "Game",
+      "source_locale": "en-US",
+      "target_locale": "zh-Hans"
+    }
+  ],
+  "source_locale": "en-US",
+  "target_locale": "zh-Hans",
+  "details": {
+    "archive_count": 33,
+    "paired_resources": 6,
+    "project_version": "1.3.1.0",
+    "source_archives": {
+      "Sandfall/Content/Paks/pakchunk0-Windows.pak": {
+        "version": "V11",
+        "mount": "../../../",
+        "encrypted": false
+      }
+    },
+    "container": {
+      "toc_version": "OnDemandMetaData",
+      "container_header_version": "NoExportInfo"
+    },
+    "engine_version_basis": "由容器格式映射得到的兼容打包参数；不是游戏 EXE 版本声明。"
+  },
+  "warnings": [],
+  "options": {
+    "pak_version": "V11",
+    "needs_iostore": true,
+    "ue_version": "UE5_4",
+    "pak_directory": "Sandfall/Content/Paks",
+    "mount_point": "../../../",
+    "language_order": "zh-en",
+    "layout": "auto",
+    "patch_name": "zzz_BilingualWorkbench_100_P",
+    "order": "zh-en"
+  },
+  "executable": "Expedition33_Steam.exe",
+  "schema_version": 1,
+  "root": "."
+}
