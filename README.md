@@ -1,38 +1,60 @@
 # 双语游戏工作台
 
-给有可用语言资源的 PC 游戏加上中英对照。游玩时按 **F8** 找回一句台词或规则说明，点词、记笔记，再回到游戏。
+在游戏里看中英对照。遇到没读懂的台词或规则，按 **F8** 搜原句，点词看释义，再回到游戏。
 
-**[下载 Windows x64 便携版](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/latest)** · Windows 10/11
+**[下载 Windows x64 便携包](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/download/v0.11.2/BilingualGameWorkbench-0.11.2-Windows-x64.zip)** · Windows 10/11 · [发行页](https://github.com/iaoq21699-sys/bilingual-game-workbench/releases/latest)
 
-## 第一次使用
+> **初期试验阶段** · 适配效果会随游戏版本、语言资源和界面布局变化。遇到问题请多多包涵。欢迎在 [Issues](https://github.com/iaoq21699-sys/bilingual-game-workbench/issues) 留下游戏版本和复现步骤。
 
-1. 下载 `BilingualGameWorkbench-0.11.2-Windows-x64.zip`，完整解压到可写目录。双击 `launch.cmd` 打开工作台。包内自带 Python 和 Tk。
-2. 想先试检索，可在「资料 → 导入文本」选择「单文件」，导入 `examples/bilingual.json`。试搜 **oxygen** 或 **氧气**，再点击英文原句中的词。
-3. 想接入游戏，从「游戏 → 接入新游戏」选择游戏目录。按提示核对实际运行程序、资源格式和语言，先试一个菜单或一段短说明。
+## 三步接入自己的游戏
 
-## 给游戏做双语和内置面板
+1. **下载并打开。** 完整解压 ZIP，双击 `launch.cmd`。包内自带运行环境。
+2. **接入双语。** 点「游戏 → 接入新游戏」，选游戏安装目录，按向导确认中英资源和游戏内显示语言。先用一条菜单或说明验证双语显示。
+3. **开启 F8 面板。** 退出游戏后，在工作台选中它，打开「面板设置」。
+   - **DirectX 游戏** 首次先运行 `prepare-native-panel.cmd` 获取配套 ReShade，再点「保存并安装」。启动游戏后按 **F8**。
+   - **Electron 游戏** 接入语料后点「保存并启用」，再从工作台启动游戏并按 **F8**。
 
-| 你的游戏或资料 | 推荐入口 | 游戏内效果 |
-| --- | --- | --- |
-| 受支持的 Unreal、Godot 或松散 JSON 语言资源 | 接入新游戏，生成并启用双语资源 | 可加载双语资源时，游戏原有菜单、对白或说明显示中英对照 |
-| 兼容的 Windows x64 DirectX 10/11/12 游戏 | 双击 `prepare-native-panel.cmd`，从 ReShade 官网下载所需运行库。退出游戏后，在「面板设置」保存并安装 | 启动游戏后按 **F8** 打开原生面板 |
-| 已适配的 Electron 本地 HTML 游戏 | 接入双语语料，在「面板设置」保存并启用，再从工作台启动 | 原位译文和 **F8** 游戏内面板 |
-| 已有中英文本文件 | 导入 UTF-8 JSON、CSV、TSV，或按稳定键成对导入 | 保持工作台运行，按 **Ctrl+Shift+B** 呼出桌面检索 |
+想先试检索，可以从「资料 → 导入文本」导入 [示例语料](examples/bilingual.json)，搜索 `oxygen` 或 `氧气`。仅接入文本时，按 **Ctrl+Shift+B** 呼出桌面检索。具体游戏版本、接入条件和恢复方法见[接入指南](docs/onboarding.md)。
 
-双语显示、内置面板与桌面检索各有接入条件。新游戏先看[接入指南和已验证的游戏](docs/onboarding.md)，实际效果取决于游戏版本、资源和窗口模式。
+## 实机效果
 
-## 玩的时候
+点击截图可查看大图。
 
-- **F8** 打开已安装的游戏内面板。输入英文或中文片段，选中结果看全文。
-- 点击英文单词查义。先点首词，再按住 **Shift** 点尾词可查连续词组。需要更完整的通用词义时，在「资料 → 选择离线词典」添加自己已有的 ECDICT 格式 CSV。
-- 「固定阅读」把原句留在侧边并归还键鼠。**F8** 回到当前检索，**Esc** 收起交互面板。
-- 「记到笔记」保存词、词组或整句。之后可在工作台「复习笔记」继续读和写备注。
+### 《光与影：33号远征队》
 
-## 制作与维护
+**中英同屏**
 
-- [从 GPT 开工到内容审校、游戏布局和验收](docs/gpt-workflow.md)
-- [语言资源、兼容性、恢复和常见问题](docs/onboarding.md)
-- [从源码运行、构建原生面板和打包](docs/build.md)
-- [第三方组件来源和许可](docs/THIRD_PARTY.txt)
+「远征基础常识」页面的菜单和战斗轮盘说明同时显示中英文。
 
-检索和笔记在本机工作，日常使用无需 AI API。公开包提供工作台、自拟示例、可移植接入配置和面板插件。游戏、译文、字体和词典由使用者按自身权限提供。
+[![《33号远征队》战斗轮盘帮助页的中英文菜单与说明](docs/readme-media/expedition33-bilingual.png)](docs/readme-media/expedition33-bilingual.png)
+
+**按 F8 检索，再点词**
+
+在春意原野按 F8，搜索 `learn from` 就能在左侧找句子，右侧阅读完整中英对照。点原句里的 `inventions`，下方显示词义。
+
+[![《33号远征队》游戏内 F8 面板搜索 learn from 并显示 inventions 释义](docs/readme-media/expedition33-f8-search.png)](docs/readme-media/expedition33-f8-search.png)
+
+### 《奇异人生：复刻版》
+
+**双语字幕与原句注释**
+
+课堂场景里，底部是游戏的中英字幕。面板中搜索 `daily selfie` 后点 `quota`，会显示句内注释，解释 Max 说「自拍定额」时的调侃。这组实拍沿用了已有双语项目的字幕资料。
+
+[![《奇异人生：复刻版》课堂双语字幕与 quota 的原句注释](docs/readme-media/life-is-strange-word-lookup.jpg)](docs/readme-media/life-is-strange-word-lookup.jpg)
+
+<details>
+<summary>查看固定阅读的小卡</summary>
+
+固定后，原句和释义留在右上角，游戏继续接收键鼠。按 **F8** 回到检索。
+
+[![《奇异人生：复刻版》右上固定阅读小卡与底部中英字幕](docs/readme-media/life-is-strange-pinned.jpg)](docs/readme-media/life-is-strange-pinned.jpg)
+
+</details>
+
+## 制作资料
+
+- [用 GPT 做双语语料、审校和面板布局](docs/gpt-workflow.md)
+- [从源码运行、构建插件与打包](docs/build.md)
+- [第三方组件来源与许可](docs/THIRD_PARTY.txt)
+
+检索与笔记保存在本机。使用游戏内的「记到笔记」可以收藏词、词组或整句，再到工作台复习。
