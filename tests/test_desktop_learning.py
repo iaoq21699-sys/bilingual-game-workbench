@@ -22,7 +22,9 @@ class DesktopLearningTests(unittest.TestCase):
         path.write_text(json.dumps([
             dict(key="one", en="Keep a seat for me.", zh="帮我留个位子。",
                  phrases=[dict(term="keep a seat", meaning="留个座位")]),
-            dict(key="two", en="Take the quiet path.", zh="走那条安静的小路。")
+            dict(key="two", en="Take the quiet path.", zh="走那条安静的小路。"),
+            dict(key="short-a", en="Run!", zh="快跑！", phrases=[dict(term="run", meaning="跑开")]),
+            dict(key="short-b", en="Run?", zh="跑吗？", phrases=[dict(term="run", meaning="跑开")])
         ], ensure_ascii=False), encoding="utf8")
         self.gid = self.service.import_file(path, "虚构游戏")["id"]
         try:
@@ -103,6 +105,46 @@ class DesktopLearningTests(unittest.TestCase):
         a.hide()
         self.assertEqual(n.window.state(), "withdrawn")
         self.assertTrue(n.window.winfo_exists())
+
+    def test_short_dialogue_and_its_only_word_both_survive_review(self):
+        a = self.app
+        a.game_picker.current(a.game_ids.index(self.gid))
+        a._game_selected()
+        a.query.set("run")
+        self._wait(lambda: a.total == 2 and a.current_entry and a.current_entry["key"] == "short-a")
+        for index, key in enumerate(("short-a", "short-b")):
+            if index:
+                a.result_cards.select(next(i for i, row in a.results.items() if row["key"] == key))
+            self._wait(lambda: a.current_entry and a.current_entry["key"] == key)
+            a.lookup_query.set("Run")
+            a._lookup()
+            self._wait(lambda: a.lookup_note is not None)
+            buttons = [a.save_sentence_button, a.save_term_button]
+            if index:
+                buttons.reverse()
+            for button in buttons:
+                button.invoke()
+                self._wait(lambda: not a.note_busy)
+                self.assertIn("已收藏，可", a.status.get())
+                button.invoke()
+                self._wait(lambda: not a.note_busy)
+                self.assertIn("已在收藏", a.status.get())
+
+        book = Notebook(self.service.data_dir)
+        rows = [book.get(row["id"]) for row in book.listing(self.gid)[1]]
+        self.assertCountEqual([(row["kind"], row["target_key"], row["meaning"]) for row in rows],
+                              [("sentence", "", ""), ("word", "run", "跑开")] * 2)
+        a._open_notes()
+        notes = a.notes_window
+        a.root.update()
+        if notes.current["kind"] != "word":
+            notes.next_button.invoke()
+        self.assertEqual(notes.current["kind"], "word")
+        notes.review_toggle.invoke()
+        self.assertNotIn("跑开", notes.detail.get("1.0", "end"))
+        notes.reveal_button.invoke()
+        self.assertIn("跑开", notes.detail.get("1.0", "end"))
+        self.assertIn(notes.current["zh"], notes.detail.get("1.0", "end"))
 
     def test_real_desktop_fallback_path_restores_only_the_captured_session(self):
         a = self.app

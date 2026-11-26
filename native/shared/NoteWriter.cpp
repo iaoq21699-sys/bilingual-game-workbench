@@ -18,6 +18,28 @@ void check(sqlite3* db, int rc) {
     }
 }
 
+void bind_text(sqlite3* db, sqlite3_stmt* statement, int index, const std::string& field) {
+    check(db, sqlite3_bind_text(statement, index, field.c_str(), static_cast<int>(field.size()), SQLITE_STATIC));
+}
+
+void free_legacy_sentence_key(sqlite3* db, const Note& note) {
+    // Match Notebook.capture: preserve any alternate sentence and its remark.
+    sqlite3_stmt* stmt = nullptr;
+    const auto rc = sqlite3_prepare_v2(db, R"sql(
+        UPDATE notes SET target_key=CASE WHEN EXISTS (
+            SELECT 1 FROM notes WHERE game_id=?1 AND entry_id=?2 AND target_key=''
+        ) THEN ':legacy-sentence:' || id ELSE '' END
+        WHERE game_id=?1 AND entry_id=?2 AND kind='sentence' AND target_key=?3
+    )sql", -1, &stmt, nullptr);
+    std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> owned(stmt, sqlite3_finalize);
+    check(db, rc);
+    bind_text(db, stmt, 1, note.game_id);
+    bind_text(db, stmt, 2, note.entry_id);
+    bind_text(db, stmt, 3, note.target_key);
+    const auto result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) check(db, result);
+}
+
 bool insert(const std::string& path, const Note& note) {
     sqlite3* raw = nullptr;
     int rc = sqlite3_open_v2(path.c_str(), &raw, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
@@ -37,25 +59,38 @@ bool insert(const std::string& path, const Note& note) {
         CREATE INDEX IF NOT EXISTS notes_by_game_time ON notes(game_id, saved_at_ms DESC, id DESC);
     )sql", nullptr, nullptr, nullptr));
 
+    const bool sentence = note.kind == "sentence";
+    const std::string key = sentence ? "" : note.target_key;
+    if (!sentence) {
+        // Both statements must commit together; closing on failure rolls back.
+        check(raw, sqlite3_exec(raw, "BEGIN IMMEDIATE", nullptr, nullptr, nullptr));
+        free_legacy_sentence_key(raw, note);
+    }
+
     sqlite3_stmt* statement = nullptr;
     rc = sqlite3_prepare_v2(raw, R"sql(
         INSERT INTO notes(game_id,game_title,entry_id,source_key,namespace,entry_source,kind,
                           target,target_key,en,zh,meaning,meaning_source,saved_at_ms)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(game_id,entry_id,target_key) DO NOTHING
+        SELECT ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14
+        WHERE ?7 <> 'sentence' OR NOT EXISTS (
+            SELECT 1 FROM notes WHERE game_id=?1 AND entry_id=?3 AND kind='sentence'
+        )
+        ON CONFLICT(game_id,entry_id,target_key) DO NOTHING
     )sql", -1, &statement, nullptr);
     std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> owned(statement, sqlite3_finalize);
     check(raw, rc);
     int index = 1;
     for (const auto* field : {&note.game_id, &note.game_title, &note.entry_id, &note.source_key,
-             &note.name_space, &note.entry_source, &note.kind, &note.target, &note.target_key,
+             &note.name_space, &note.entry_source, &note.kind, &note.target, &key,
              &note.en, &note.zh, &note.meaning, &note.meaning_source}) {
-        check(raw, sqlite3_bind_text(statement, index++, field->c_str(),
-                                    static_cast<int>(field->size()), SQLITE_STATIC));
+        bind_text(raw, statement, index++, *field);
     }
     check(raw, sqlite3_bind_int64(statement, index, note.saved_at_ms));
     rc = sqlite3_step(statement);
     if (rc != SQLITE_DONE) check(raw, rc);
-    return sqlite3_changes(raw) == 1; // autocommit has finished
+    const bool inserted = sqlite3_changes(raw) == 1;
+    if (!sentence) check(raw, sqlite3_exec(raw, "COMMIT", nullptr, nullptr, nullptr));
+    return inserted;
 }
 } // namespace
 

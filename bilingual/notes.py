@@ -47,7 +47,7 @@ class Notebook:
                 raise ValueError("这条笔记已不存在，备注仍保留在输入框中。")
 
     def capture(self, entry, title, kind, target, target_key, meaning="", meaning_source=""):
-        """Store a web-panel snapshot in the same notebook as the native add-on."""
+        """Store a snapshot in the notebook shared with the native add-on."""
         with closing(self._connect("rwc")) as db, db:
             db.executescript("""
                 PRAGMA synchronous=FULL;
@@ -61,9 +61,26 @@ class Notebook:
                 );
                 CREATE INDEX IF NOT EXISTS notes_by_game_time ON notes(game_id, saved_at_ms DESC, id DESC);
             """)
+            game_id, entry_id = entry["game_id"], entry["id"]
+            if kind == "sentence":
+                target_key = ""
+            else:
+                # Old desktop/web versions used a lexical key for whole lines.
+                # Free just this colliding key. Never merge or discard old remarks.
+                # ':' is outside the normalized vocabulary key alphabet.
+                db.execute("""UPDATE notes
+                    SET target_key=CASE WHEN EXISTS (
+                        SELECT 1 FROM notes WHERE game_id=:game AND entry_id=:entry AND target_key=''
+                    ) THEN ':legacy-sentence:' || id ELSE '' END
+                    WHERE game_id=:game AND entry_id=:entry AND kind='sentence' AND target_key=:key""",
+                    dict(game=game_id, entry=entry_id, key=target_key))
             changed = db.execute("""INSERT INTO notes(game_id,game_title,entry_id,source_key,namespace,
                 entry_source,kind,target,target_key,en,zh,meaning,meaning_source,saved_at_ms)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(game_id,entry_id,target_key) DO NOTHING""",
-                (entry["game_id"], title, entry["id"], entry["key"], entry["namespace"], entry["source"],
+                SELECT ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14
+                WHERE ?7 <> 'sentence' OR NOT EXISTS (
+                    SELECT 1 FROM notes WHERE game_id=?1 AND entry_id=?3 AND kind='sentence'
+                )
+                ON CONFLICT(game_id,entry_id,target_key) DO NOTHING""",
+                (game_id, title, entry_id, entry["key"], entry["namespace"], entry["source"],
                  kind, target, target_key, entry["en"], entry["zh"], meaning, meaning_source, time.time_ns() // 1_000_000))
             return changed.rowcount == 1

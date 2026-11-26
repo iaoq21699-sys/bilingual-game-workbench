@@ -170,6 +170,28 @@ class ElectronTests(unittest.TestCase):
         row = book.get(rows[0]["id"])
         self.assertEqual((row["en"], row["zh"], row["kind"]), ("Good morning", "早安", "phrase"))
 
+    def test_f8_handler_keeps_short_dialogue_and_word_separate(self):
+        from bilingual.electron_runtime import Library
+        from bilingual.notes import Notebook
+        corpus = self.base / "short-lines.json"
+        corpus.write_text(self.json([
+            dict(key="short-a", en="Run!", zh="快跑！", phrases=[dict(term="run", meaning="跑开")]),
+            dict(key="short-b", en="Run?", zh="跑吗？", phrases=[dict(term="run", meaning="跑开")]),
+        ]), encoding="utf-8")
+        gid = self.service.import_file(corpus, "短句样本")["id"]
+        library = Library(self.service, dict(id=gid, title="短句样本", pairs=[]))
+        items = library.handle(dict(action="search", query="Run"))["items"]
+        self.assertEqual(len(items), 2)
+        for entry, terms in zip(items, [("", "Run"), ("Run", "")]):
+            for term in terms:
+                request = dict(action="note", entry=entry["id"], term=term)
+                self.assertEqual(library.handle(request), {"saved": True})
+                self.assertEqual(library.handle(request), {"saved": False})
+        book = Notebook(self.service.data_dir)
+        rows = [book.get(row["id"]) for row in book.listing(gid)[1]]
+        self.assertCountEqual([(row["kind"], row["target_key"], row["meaning"]) for row in rows],
+                              [("sentence", "", ""), ("word", "run", "跑开")] * 2)
+
     def test_renderer_and_desktop_share_saved_appearance(self):
         from bilingual import native_overlay, themes
         from bilingual.electron_runtime import Library

@@ -943,7 +943,7 @@ class Desktop:
 
     def _save_sentence(self):
         if self.current_entry:
-            self._save_note("sentence", display_text(self.current_entry["en"]), note_key(display_text(self.current_entry["en"])),
+            self._save_note("sentence", display_text(self.current_entry["en"]), "",
                             self.current_entry.get("note") or "", "原句注释" if self.current_entry.get("note") else "")
 
     def _save_term(self):

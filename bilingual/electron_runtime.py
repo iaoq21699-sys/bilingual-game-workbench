@@ -136,11 +136,8 @@ class Library:
             return meaning
         kind = ("phrase" if " " in target_key else "word") if target else "sentence"
         snapshot = dict(row, en=original, zh=self._shown(row, "zh"))
-        # Whole-text notes keep the corpus key even when the displayed scene
-        # now renders the game's actor references as names.
-        note_key = target_key or _term(_text(row["en"]))
         created = self.notebook.capture(snapshot, self.title, kind, target or original,
-                                        note_key, meaning.get("meaning", ""),
+                                        target_key, meaning.get("meaning", ""),
                                         meaning.get("source", "原句注释" if meaning else ""))
         return dict(saved=created)
 
