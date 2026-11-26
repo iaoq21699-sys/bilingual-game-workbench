@@ -118,6 +118,27 @@ class DesktopLearningTests(unittest.TestCase):
         a.hide()
         session.restore_focus.assert_called_once_with()
 
+    def test_failed_desktop_return_keeps_the_hint_visible_and_second_escape_hides(self):
+        a = self.app
+        session = Mock()
+        session.capture_foreground.return_value = True
+        session.restore_focus.return_value = False
+        a.sessions = {self.gid: session}
+        with patch.object(a.hotkey, "active", True):
+            a.toggle()
+            a.root.update()
+            a.root.event_generate("<Escape>", when="now")
+            a.root.update()
+            session.restore_focus.assert_called_once_with()
+            self.assertEqual(a.root.state(), "normal")
+            self.assertIn("Alt+Tab", a.status.get())
+            self.assertIsNone(a.return_session)
+
+            a.root.event_generate("<Escape>", when="now")
+            a.root.update()
+            self.assertEqual(a.root.state(), "withdrawn")
+            session.restore_focus.assert_called_once_with()
+
     def test_blocked_wizard_exposes_routes_not_an_install_button(self):
         a = self.app
         choices = Mock()

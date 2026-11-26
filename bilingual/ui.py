@@ -1426,18 +1426,19 @@ class Desktop:
         def launched(data):
             self.launching_game = None
             self._prepare_sessions({game_id: data.get("info", {})})
-            self.return_session = self.sessions.get(game_id)
+            session = self.sessions.get(game_id)
+            self.return_session = None  # Set only when a hotkey captures a visible game.
             result = data.get("result")
-            if self.return_session and isinstance(result, dict) and result.get("pid"):
-                self.return_session.set_process(result["pid"])
+            if session and isinstance(result, dict) and result.get("pid"):
+                session.set_process(result["pid"])
             self._load_games(self.game_id)
             self.status.set(str(data.get("result", "游戏已启动。")))
-            if data.get("native"):
-                # Leave a taskbar entry for health results without mapping or
-                # focusing the workbench over the newly launched game.
-                self.root.iconify()
-            else:
-                self.hide()
+            # The launch callback can precede the first game window. Don't
+            # report it as a failed return, or reopen the workbench over it.
+            native = data.get("native", False)
+            self._hide_windows(keep_taskbar=native)
+            if session and not native:
+                session.restore_focus()
 
         self._submit(launch, launched, "正在启动游戏与双语面板…", mutation=True, failure=failed)
 
@@ -1500,18 +1501,23 @@ class Desktop:
     def _refresh(self):
         self._submit(self.service.refresh, self._operation_done, "正在更新已接入游戏的文本库…", mutation=True)
 
-    def hide(self):
-        # Review belongs outside gameplay. Keep the note window and any draft
-        # intact, but never leave it floating over a game we're returning to.
+    def _hide_windows(self, *, keep_taskbar=False):
+        # Keep note drafts, but never leave their window floating over the game.
         if self.notes_window and self.notes_window.window.winfo_exists():
             self.notes_window.window.withdraw()
-        if self.hotkey.active:
+        if self.hotkey.active and not keep_taskbar:
             self.root.withdraw()
         else:
             self.root.iconify()
-        if self.return_session:
-            if not self.return_session.restore_focus():
-                self.status.set(self.return_session.last_error)
+
+    def hide(self):
+        # Try the captured game while the hint can still be seen. A failed
+        # attempt consumes the return target: the next Esc just dismisses us.
+        session, self.return_session = self.return_session, None
+        if session is not None and not session.restore_focus():
+            self.status.set("未切回游戏。可用 Alt+Tab 手动切换，或再按 Esc 收起。")
+            return
+        self._hide_windows()
 
     def toggle(self):
         captured_game = None
