@@ -110,6 +110,8 @@ def apply_styles(root):
         style.configure(name, background=color)
     style.configure("TLabel", background=PANEL, foreground=INK)
     style.configure("Muted.TLabel", foreground=MUTED)
+    style.configure("ReviewTitle.TLabel", background=SURFACE, foreground=ACCENT, font=(FONT, 11, "bold"))
+    style.configure("ReviewHint.TLabel", background=SURFACE, foreground=INK, font=(FONT, 9))
     style.configure("Title.TLabel", background=BG, foreground=INK, font=(FONT, 19, "bold"))
     style.configure("Section.TLabel", foreground=INK, font=(FONT, 12, "bold"))
     style.configure("Eyebrow.TLabel", foreground=ACCENT, font=(FONT, 9, "bold"))

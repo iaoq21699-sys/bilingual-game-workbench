@@ -1,5 +1,6 @@
 """Unreal format and staging checks using a tiny fake game, never installed games."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -31,6 +32,7 @@ class UnrealFormatTests(unittest.TestCase):
         self.assertEqual(unreal._combine("{Count}|plural(one=item,other=items)", "{Count}个物品", {})[1], "complex_format_preserved")
 
 
+@unittest.skipUnless(os.name == "nt", "This repository bundles only Windows repak/retoc")
 class UnrealStagingTests(unittest.TestCase):
     def setUp(self):
         self.tools = Path(__file__).resolve().parents[1] / "tools"

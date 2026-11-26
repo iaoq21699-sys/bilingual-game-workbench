@@ -48,7 +48,7 @@ def _separator(options, table, key, english, chinese):
     return "\n"
 
 
-def _root(value):
+def _root(value, *, optional=False):
     root = Path(value).expanduser().resolve()
     if not root.is_dir():
         raise ValueError("所选游戏目录不存在。")
@@ -59,6 +59,8 @@ def _root(value):
         candidates += [p for p in (root / "playtest").iterdir() if p.is_dir() and any(p.glob("*.pck"))]
     if len(candidates) == 1:
         return candidates[0].resolve()
+    if optional and not candidates:
+        return None
     raise ValueError("未找到唯一的独立 Godot PCK；请选择包含游戏 EXE 和 PCK 的目录。")
 
 
@@ -85,7 +87,9 @@ def _load_json(raw):
 
 
 def probe(root, tools_dir=None):
-    root = _root(root)
+    root = _root(root, optional=True)
+    if root is None:
+        return None
     packs = []
     failures = []
     for path in sorted(root.glob("*.pck")):

@@ -45,6 +45,8 @@ def save_appearance(service, game_id, theme, card_side):
 
 @contextmanager
 def launch_lock(folder):
+    if os.name != "nt":
+        raise ValueError("Electron 游戏内面板当前支持 Windows。")
     import msvcrt
 
     folder.mkdir(parents=True, exist_ok=True)

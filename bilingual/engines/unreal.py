@@ -231,10 +231,10 @@ def _iostore_version(retoc: Path, path: Path) -> tuple[str | None, dict]:
 
 def probe(root: Path, tools_dir: Path) -> dict:
     requested = Path(root).expanduser().resolve()
-    repak = _tool(tools_dir, "repak")
     found = _pak_dirs(requested)
     if not found:
-        raise ValueError("未找到 Unreal 的 Content/Paks 目录。请选择游戏安装目录。")
+        return None
+    repak = _tool(tools_dir, "repak")
     paks = found[0]
     base = paks.parents[2]
     if paks.parent.parent == requested and requested.name.lower() != "content":
@@ -289,7 +289,8 @@ def probe(root: Path, tools_dir: Path) -> dict:
                       "namespace": PurePosixPath(label).stem,
                       "source_locale": english[0], "target_locale": chinese[0]})
     if not pairs:
-        raise ValueError("没有发现可自动配对的中英文 locres。可能仅有一种语言、资源已加密或需要其他适配器。")
+        return dict(pairs=[], warnings=[
+            "已找到 Content/Paks，但未找到可自动配对的中英文 locres。", *warnings[:4]])
     game_pairs = [p for p in pairs if not p["target"].startswith("Engine/")]
     primary = (game_pairs or pairs)[0]
     versions = [v["version"] for v in archive_info.values() if v["version"] in PAK_VERSIONS]

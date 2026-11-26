@@ -14,6 +14,7 @@ from tkinter import font as tkfont
 from .hotkey import GlobalHotkey
 from .game_session import GameSession
 from .core import display_text
+from .notes import Notebook, note_key
 from .ui_design import (BG, PANEL, SURFACE, INK, MUTED, ACCENT, LINE, WARN, FONT,
                         ENGLISH_FONT, PAPER, PAPER_INK, PAPER_MUTED, PAPER_ACCENT, PAPER_MARK,
                         apply_styles, book_mark, tooltip)
@@ -32,6 +33,7 @@ class ResultCards(ttk.Frame):
         self.on_select = on_select
         self.on_empty = on_empty
         self.compact = compact
+        self.show_secondary = True
         self.items = []
         self.selected_id = None
         self.hovered = None
@@ -138,8 +140,9 @@ class ResultCards(ttk.Frame):
             title = self._fit(english, self.english_font, usable) if self.compact else self._english(english, usable)
             self.canvas.create_text(16, en_y, anchor="nw", text=title, fill=INK, font=self.english_font)
             zh_y = y + self.card_height - self.chinese_font.metrics("linespace") - 10
-            chinese = brief(display_text(item.get("zh")) or "（缺少中文）", 160)
-            self.canvas.create_text(16, zh_y, anchor="nw", text=self._fit(chinese, self.chinese_font, usable), fill=MUTED, font=self.chinese_font)
+            if self.show_secondary:
+                secondary = brief(display_text(item.get("zh")) or "（缺少中文）", 160)
+                self.canvas.create_text(16, zh_y, anchor="nw", text=self._fit(secondary, self.chinese_font, usable), fill=MUTED, font=self.chinese_font)
 
     def set_items(self, items):
         self.items = list(items)
@@ -148,7 +151,11 @@ class ResultCards(ttk.Frame):
         self.canvas.yview_moveto(0)
         self._draw()
 
-    def select(self, identifier):
+    def set_secondary_visible(self, visible):
+        self.show_secondary = visible
+        self._draw()
+
+    def select(self, identifier, *, notify=True):
         if identifier is None or not any(str(item["id"]) == str(identifier) for item in self.items):
             return
         self.selected_id = str(identifier)
@@ -158,7 +165,8 @@ class ResultCards(ttk.Frame):
         if y < top or y + self.card_height > top + self.canvas.winfo_height():
             self.canvas.yview_moveto(y / max(1, len(self.items) * (self.card_height + 10)))
         self._draw()
-        self.on_select(self.selected_id)
+        if notify:
+            self.on_select(self.selected_id)
 
     def _click(self, event):
         self.canvas.focus_set()
@@ -243,6 +251,8 @@ class Desktop:
         self.detail_generation = 0
         self.operation_busy = False
         self.notes_window = None
+        self.note_busy = False
+        self.lookup_note = None
         self.initial_load = True
         self.games_generation = 0
         self.sessions = {}
@@ -304,7 +314,7 @@ class Desktop:
         library_button.pack(side="left", padx=1)
         self.library_menu = self._menu(library_button)
         library_button.configure(menu=self.library_menu)
-        ttk.Button(controls, text="复习笔记", style="Secondary.TButton", command=self._open_notes).pack(side="left", padx=(10, 2))
+        ttk.Button(controls, text="收藏与复习", style="Secondary.TButton", command=self._open_notes).pack(side="left", padx=(10, 2))
         for label, callback in (("接入已有双语项目", self._add_root), ("导入文本…", self._import_menu), ("选择离线词典…", self._import_dictionary), ("导出当前文本库", self._export), ("更新本地文本库", self._refresh)):
             self.library_menu.add_command(label=label, command=callback)
         self.library_menu.add_separator()
@@ -364,6 +374,7 @@ class Desktop:
         search_heading.pack(fill="x", pady=(0, 10))
         ttk.Label(search_heading, text="查找原句", font=(FONT, 15, "bold")).pack(side="left")
         ttk.Label(search_heading, text="Ctrl + F", style="Caption.TLabel").pack(side="right")
+        ttk.Label(left, text="按台词或术语检索，支持中英文。", style="Caption.TLabel", wraplength=255).pack(anchor="w", pady=(0, 6))
         search_row = ttk.Frame(left)
         search_row.pack(fill="x")
         self.search_box = ttk.Entry(search_row, textvariable=self.query, style="Search.TEntry", font=(FONT, 11), width=10)
@@ -399,6 +410,9 @@ class Desktop:
         self.detail_context.pack(side="left", fill="x", expand=True)
         self.copy_button = ttk.Button(detail_header, text="复制原句", style="Quiet.TButton", command=self._copy)
         self.copy_button.pack(side="right")
+        self.save_sentence_button = ttk.Button(detail_header, text="收藏整句", style="Secondary.TButton",
+                                               command=self._save_sentence)
+        self.save_sentence_button.pack(side="right", padx=(0, 6))
         lookup_block = ttk.Frame(right)
         lookup_block.pack(side="bottom", fill="x", pady=(7, 0))
         ttk.Separator(lookup_block).pack(fill="x", pady=(0, 9))
@@ -406,6 +420,7 @@ class Desktop:
         lookup_row.pack(fill="x", pady=(0, 7))
         ttk.Label(lookup_row, text="词语释义", font=(FONT, 11, "bold")).pack(side="left", padx=(0, 10))
         self.lookup_query = tk.StringVar()
+        self.lookup_query.trace_add("write", self._clear_lookup_note)
         lookup_entry = ttk.Entry(lookup_row, textvariable=self.lookup_query, width=8, style="Search.TEntry", font=("Segoe UI", 11))
         lookup_entry.pack(side="left", fill="x", expand=True)
         lookup_entry.bind("<Return>", lambda event: self._lookup())
@@ -413,6 +428,9 @@ class Desktop:
         selection_button = ttk.Button(lookup_row, text="查选中", style="Quiet.TButton", command=self._lookup_selection)
         selection_button.pack(side="left", padx=(3, 0))
         tooltip(selection_button, "在原句或句内单词页拖动选中一个词组，再点击这里查看释义。")
+        self.save_term_button = ttk.Button(lookup_row, text="收藏词语", style="Secondary.TButton",
+                                           state="disabled", command=self._save_term)
+        self.save_term_button.pack(side="right", padx=(2, 0))
         lookup_body = ttk.Frame(lookup_block)
         lookup_body.pack(fill="x")
         self.lookup_text = tk.Text(lookup_body, height=3, bg=SURFACE, fg=INK, insertbackground=ACCENT, selectbackground="#31566A", selectforeground=INK, font=(FONT, 11), wrap="word", relief="flat", padx=14, pady=9, spacing3=4, highlightthickness=0, exportselection=False)
@@ -623,7 +641,12 @@ class Desktop:
         self.game_id = self.game_ids[index] if 0 <= index < len(self.game_ids) else None
         game = self.game_rows.get(self.game_id)
         if game:
-            mode = "  ·  Electron" if game.get("panel_backend") == "electron" else ""
+            if game.get("panel_backend") == "electron":
+                mode = "  ·  Electron 内置会话需从工作台启动"
+            elif not self._supports_native(game):
+                mode = "  ·  仅桌面检索与复习"
+            else:
+                mode = ""
             self.game_summary.configure(text=f"{game.get('count', 0):,} 条文本  ·  {game.get('paired', 0):,} 条中英对照" + mode)
         else:
             self.game_summary.configure(text="跨游戏检索  ·  选择单款游戏，即可启动或设置面板")
@@ -631,7 +654,7 @@ class Desktop:
         gid = self.game_id
         self._submit(lambda: self.service.categories(gid), lambda values: self.category_box.configure(values=["全部类别"] + values) if gid == self.game_id else None)
         self._button_states()
-        if self.game_id:
+        if game and self._supports_native(game):
             self.native_health.pack(fill="x", padx=20, pady=(0, 8))
         else:
             self.native_health.pack_forget()
@@ -747,12 +770,17 @@ class Desktop:
             return
         self.detail_generation += 1
         generation = self.detail_generation
+        self.current_entry = None
+        self._clear_lookup_note()
+        self._note_buttons()
+        self.copy_button.configure(state="disabled")
         self._submit(lambda: self.service.entry(identifier), lambda entry: self._show_entry(entry) if generation == self.detail_generation else None)
 
     def _empty_detail(self, message):
         self.detail_context.configure(text="")
         self.provenance_button.configure(state="disabled", text="来源与核对信息  ▸")
         self.copy_button.configure(state="disabled")
+        self.save_sentence_button.configure(state="disabled")
         for widget in (self.reading, self.vocabulary):
             widget.configure(state="normal")
             widget.delete("1.0", "end")
@@ -775,6 +803,7 @@ class Desktop:
             self.lookup_text.configure(state="disabled")
         self.current_entry = entry
         self.copy_button.configure(state="normal")
+        self._note_buttons()
         text = self.reading
         text.configure(state="normal")
         text.delete("1.0", "end")
@@ -893,6 +922,57 @@ class Desktop:
             self.lookup_text.insert("end", "本地词典暂无释义，可尝试原形或更短的词组。", "hint")
         self.lookup_text.configure(state="disabled")
         self.lookup_text.yview_moveto(0)
+        self.lookup_note = None
+        entry = self.current_entry
+        key = note_key(term)
+        if entry and key and f" {key} " in f" {note_key(display_text(entry['en']))} ":
+            item = hits[0][0] if hits else {}
+            self.lookup_note = (entry["id"], term, key, item.get("meaning", "") if item.get("source") != "未收录" else "",
+                                item.get("source", "原句注释") if item and item.get("source") != "未收录" else "")
+        self._note_buttons()
+
+    def _clear_lookup_note(self, *_):
+        self.lookup_note = None
+        if hasattr(self, "save_term_button"):
+            self.save_term_button.configure(state="disabled")
+
+    def _note_buttons(self):
+        self.save_sentence_button.configure(state="normal" if self.current_entry and not self.note_busy else "disabled")
+        same = self.lookup_note and self.current_entry and self.lookup_note[0] == self.current_entry["id"]
+        self.save_term_button.configure(state="normal" if same and not self.note_busy else "disabled")
+
+    def _save_sentence(self):
+        if self.current_entry:
+            self._save_note("sentence", display_text(self.current_entry["en"]), note_key(display_text(self.current_entry["en"])),
+                            self.current_entry.get("note") or "", "原句注释" if self.current_entry.get("note") else "")
+
+    def _save_term(self):
+        if self.current_entry and self.lookup_note and self.lookup_note[0] == self.current_entry["id"]:
+            _, term, key, meaning, source = self.lookup_note
+            self._save_note("phrase" if " " in key else "word", term, key, meaning, source)
+
+    def _save_note(self, kind, target, key, meaning, source):
+        if self.note_busy or not self.current_entry:
+            return
+        entry = dict(self.current_entry)
+        title = self.game_rows.get(entry["game_id"], {}).get("title") or "游戏文本"
+        # Copy the exact visible entry; the worker must not read changing UI state.
+        snapshot = dict(entry, en=display_text(entry["en"]), zh=display_text(entry["zh"]))
+        self.note_busy = True
+        self._note_buttons()
+
+        def finished(created):
+            self.note_busy = False
+            self._note_buttons()
+            self.status.set("已收藏，可在「收藏与复习」查看。" if created else "这条内容已在收藏中。")
+
+        def failed(error):
+            self.note_busy = False
+            self._note_buttons()
+            self.status.set("收藏未保存，请重试：" + brief(error, 100))
+
+        self._submit(lambda: Notebook(self.service.data_dir).capture(snapshot, title, kind, target, key, meaning, source),
+                     finished, failure=failed)
 
     @staticmethod
     def _source_label(value):
@@ -1056,17 +1136,68 @@ class Desktop:
         lines.append("双语显示覆盖本次识别的语言资源；贴图中的文字和运行时生成内容需单独适配。")
         return "\n".join(lines)
 
+    def _show_connect_diagnostics(self, probe):
+        from .onboarding import describe
+
+        title, advice, engine = describe(probe)
+        window = tk.Toplevel(self.root)
+        window.title("新游戏接入 · 诊断")
+        window.configure(bg=BG)
+        window.transient(self.root)
+        window.geometry("640x370")
+        window.minsize(540, 350)
+        frame = ttk.Frame(window, padding=20)
+        frame.pack(fill="both", expand=True)
+        ttk.Label(frame, text=engine, style="Warning.Badge.TLabel").pack(anchor="w")
+        ttk.Label(frame, text=title, style="ReaderTitle.TLabel").pack(anchor="w", pady=(10, 6))
+        summary = ttk.Label(frame, text=advice, style="Muted.TLabel", justify="left")
+        summary.pack(fill="x", pady=(0, 10))
+        summary.bind("<Configure>", lambda event: summary.configure(wraplength=max(1, event.width - 4)))
+        buttons = ttk.Frame(frame)
+        buttons.pack(side="bottom", fill="x", pady=(12, 0))
+
+        def follow(callback):
+            window.destroy()
+            callback()
+
+        ttk.Button(buttons, text="重选目录", style="Primary.TButton",
+                   command=lambda: follow(self._inspect_new_game)).pack(side="left")
+        ttk.Button(buttons, text="导入接入配置",
+                   command=lambda: follow(self._import_profile)).pack(side="left", padx=6)
+        ttk.Button(buttons, text="仅导入文本",
+                   command=lambda: follow(self._import_menu)).pack(side="left")
+        close = ttk.Button(buttons, text="关闭", command=window.destroy)
+        close.pack(side="right")
+        body = ttk.Frame(frame)
+        body.pack(fill="both", expand=True)
+        details = tk.Text(body, bg=SURFACE, fg=INK, relief="flat", wrap="word",
+                          padx=12, pady=10, font=(FONT, 10), height=5)
+        scrollbar = ttk.Scrollbar(body, orient="vertical", command=details.yview)
+        scrollbar.pack(side="right", fill="y")
+        details.pack(side="left", fill="both", expand=True)
+        details.configure(yscrollcommand=scrollbar.set)
+        notes = ["所选目录：" + str(probe.get("root", "")), "本次仅检查，未修改游戏文件。"]
+        if probe.get("details"):
+            notes.append(self._probe_details(probe))
+        if probe.get("executables"):
+            notes.append("候选启动程序：" + "、".join(probe["executables"][:6]))
+        notes.extend(self._lines(probe.get("warnings")).splitlines()[:8])
+        notes.extend(f"{source}：{message}" for source, message in probe.get("issues", [])[:8])
+        details.insert("1.0", "\n\n".join(notes)[:5000])
+        details.configure(state="disabled")
+        window.bind("<Escape>", lambda event: window.destroy())
+        window.grab_set()
+        close.focus_set()
+        self.status.set("未完成游戏接入 · 未修改游戏文件")
+
     def _show_connect_wizard(self, probe):
         if not isinstance(probe, dict):
             raise ValueError("游戏识别结果格式不正确。")
+        if probe.get("connectable") is False:
+            self._show_connect_diagnostics(probe)
+            return
         probe = copy.deepcopy(probe)
         corpus_only = bool(probe.get("corpus_only"))
-        if probe.get("connectable") is False:
-            details = self._probe_details(probe)
-            messagebox.showinfo("已识别游戏 · 暂无可配对的语言数据",
-                                details + "\n\n" + self._lines(probe.get("warnings")), parent=self.root)
-            self.status.set("已识别游戏资源类型；暂不具备可靠语料接入条件。")
-            return
         window = tk.Toplevel(self.root)
         window.title("新游戏接入 · 确认语料" if corpus_only else "新游戏接入 · 确认双语显示")
         window.configure(bg=PANEL)
@@ -1135,7 +1266,9 @@ class Desktop:
         preview.configure(yscrollcommand=scrollbar.set)
         pairs = probe.get("pairs") or []
         details = self._probe_details(probe)
-        explanation = ["支持范围与识别结果", f"已识别 {len(pairs)} 组语言资源。", details]
+        from .onboarding import describe
+        next_step, route, engine = describe(probe)
+        explanation = [f"{engine}  ·  已识别 {len(pairs)} 组候选语言资源。", next_step + "\n" + route, details]
         if probe.get("warnings"):
             explanation.extend(["\n需要留意", self._lines(probe["warnings"])])
         explanation.append("\n游玩中可用 Ctrl+Shift+B 呼出桌面检索面板，Esc 收起并返回游戏。建议窗口化或无边框显示；面板不自动跟随实时对白。")
@@ -1368,6 +1501,10 @@ class Desktop:
         self._submit(self.service.refresh, self._operation_done, "正在更新已接入游戏的文本库…", mutation=True)
 
     def hide(self):
+        # Review belongs outside gameplay. Keep the note window and any draft
+        # intact, but never leave it floating over a game we're returning to.
+        if self.notes_window and self.notes_window.window.winfo_exists():
+            self.notes_window.window.withdraw()
         if self.hotkey.active:
             self.root.withdraw()
         else:
@@ -1380,10 +1517,8 @@ class Desktop:
         captured_game = None
         for game_id, session in self.sessions.items():
             if session.capture_foreground():
-                from .native_overlay import installed
-                if installed(self.service, game_id):
-                    # The in-game F8 panel owns reading while this game is active.
-                    return
+                # Ctrl+Shift+B is the explicit desktop fallback, even if
+                # an installed F8 panel fails to load in this session.
                 captured_game = game_id
                 self.return_session = session
                 break
@@ -1391,7 +1526,7 @@ class Desktop:
             if not captured_game:
                 # Opening from the desktop must not later redirect focus to an old game.
                 self.return_session = None
-            if captured_game and captured_game in self.game_ids:
+            if captured_game and captured_game != self.game_id and captured_game in self.game_ids:
                 self.game_picker.current(self.game_ids.index(captured_game))
                 self._game_selected()
             self.root.deiconify()

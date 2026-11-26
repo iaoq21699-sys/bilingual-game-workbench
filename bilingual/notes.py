@@ -4,6 +4,12 @@ import sqlite3
 import time
 
 
+def note_key(value):
+    from .core import TOKENS
+
+    return " ".join(TOKENS.findall(value.replace("’", "'").lower()))
+
+
 class Notebook:
     def __init__(self, data_dir):
         self.path = data_dir / "notes.sqlite3"

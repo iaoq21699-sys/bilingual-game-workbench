@@ -51,21 +51,45 @@ class Profiles:
             raise ValueError("请选择已经解压或安装的游戏目录。")
         configuration = root / "bilingual-game.json"
         if configuration.is_file():
-            return self.read(configuration, root)
-        errors = []
+            try:
+                return self.read(configuration, root)
+            except (ValueError, OSError, RuntimeError, KeyError, TypeError) as exc:
+                return self._blocked(root, "invalid_profile", [("profile", str(exc))])
+        issues = []
         for name in ENGINES:
             try:
                 result = self.engine(name).probe(root, self.tools_dir)
-                if result and result.get("pairs"):
+                if not result:
+                    continue
+                if name == "godot" and result.get("pairs"):
+                    if not any(pair["source"] and pair["target"] for pair in result["pairs"]):
+                        issues.append((name, "检测到 PCK 语言资源，但没有完整的中英配对。"))
+                        continue
+                    if result["options"]["loader"] == "unconfigured":
+                        issues.append((name, "PCK 找到中英文资源，但未识别该游戏的模组加载方式，需要适配配置。"))
+                        continue
+                if result.get("pairs"):
                     return self.validate(result)
-                if result and result.get("recognized") and self.corpus_only(result):
-                    # A recognized container without safe language pairs is a
-                    # useful diagnostic, not an unknown game or an installable profile.
+                if result.get("recognized") and self.corpus_only(result):
                     return self.validate(result, allow_unpaired=True)
-            except (ValueError, FileNotFoundError, RuntimeError) as exc:
-                errors.append(str(exc))
-        raise ValueError("没有识别到可自动接入的中英文资源。\n可导入已有接入配置，或选择松散 JSON 的两种语言文件。\n"
-                         + "\n".join(dict.fromkeys(errors))[:1600])
+                if result.get("warnings"):
+                    issues.extend((name, warning) for warning in result["warnings"])
+            except (ValueError, OSError, RuntimeError) as exc:
+                issues.append((name, str(exc)))
+        exes = sorted(p.name for p in root.glob("*.exe") if p.is_file())
+        if not exes:
+            reason = "missing_exe"
+        elif issues:
+            reason = "resource_issue"
+        else:
+            reason = "unsupported"
+        return self._blocked(root, reason, issues, exes=exes)
+
+    @staticmethod
+    def _blocked(root, reason, issues, *, exes=()):
+        # Not a profile. Never persist it or feed partial scan results to connect.
+        return dict(root=str(root), title=root.name, connectable=False,
+                    diagnostic=reason, executables=list(exes), issues=issues)
 
     def validate(self, candidate, allow_unpaired=False):
         profile = copy.deepcopy(candidate)
@@ -143,6 +167,8 @@ class Profiles:
         return False
 
     def connect(self, candidate):
+        if candidate.get("connectable") is False:
+            raise ValueError("本次未找到可接入的中英文资源，请先处理接入诊断。")
         profile = self.validate(candidate)
         root = Path(profile["root"])
         corpus_only = self.corpus_only(profile)
