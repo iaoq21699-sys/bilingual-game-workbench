@@ -1,7 +1,14 @@
 """Store game-captured snapshots and edit their personal remarks."""
 from contextlib import closing
+from enum import IntEnum
 import sqlite3
 import time
+
+
+class CaptureResult(IntEnum):
+    DUPLICATE = 0
+    CREATED = 1
+    COMPLETED = 2
 
 
 def note_key(value):
@@ -74,6 +81,16 @@ class Notebook:
                     ) THEN ':legacy-sentence:' || id ELSE '' END
                     WHERE game_id=:game AND entry_id=:entry AND kind='sentence' AND target_key=:key""",
                     dict(game=game_id, entry=entry_id, key=target_key))
+                # Allow an explicit second capture to fill a missing definition,
+                # without replacing the snapshot, its timestamp, or any remarks.
+                completed = db.execute("""UPDATE notes SET meaning=:meaning, meaning_source=:source
+                    WHERE game_id=:game AND entry_id=:entry AND target_key=:key
+                      AND kind IN ('word','phrase')
+                      AND (trim(meaning)='' OR meaning_source='未收录')
+                      AND trim(:meaning)<>'' AND :source<>'未收录'""",
+                    dict(game=game_id, entry=entry_id, key=target_key, meaning=meaning, source=meaning_source))
+                if completed.rowcount == 1:
+                    return CaptureResult.COMPLETED
             changed = db.execute("""INSERT INTO notes(game_id,game_title,entry_id,source_key,namespace,
                 entry_source,kind,target,target_key,en,zh,meaning,meaning_source,saved_at_ms)
                 SELECT ?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14
@@ -83,4 +100,4 @@ class Notebook:
                 ON CONFLICT(game_id,entry_id,target_key) DO NOTHING""",
                 (game_id, title, entry_id, entry["key"], entry["namespace"], entry["source"],
                  kind, target, target_key, entry["en"], entry["zh"], meaning, meaning_source, time.time_ns() // 1_000_000))
-            return changed.rowcount == 1
+            return CaptureResult.CREATED if changed.rowcount == 1 else CaptureResult.DUPLICATE

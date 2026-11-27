@@ -324,7 +324,7 @@ function mount(options, mountTranslations) {
         $("note").disabled = $("sentence").disabled = true;
         try {
             const result = await request("note", {entry: id, term: whole ? "" : selected});
-            if (entry?.id === id) receipt.textContent = result.saved ? "已记下" : "已记过";
+            if (entry?.id === id) receipt.textContent = result.completed ? "已补上释义" : result.saved ? "已记下" : "已记过";
         } catch (error) {
             if (entry?.id === id) receipt.textContent = error.message;
         } finally {

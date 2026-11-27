@@ -644,7 +644,7 @@ private:
             if (!receipt.error.empty()) { failed_notes_.push_back(std::move(receipt)); continue; }
             receipt_entry_ = receipt.note.entry_id;
             receipt_target_ = receipt.note.target_key;
-            receipt_text_ = receipt.inserted ? "已记下" : "已记过";
+            receipt_text_ = receipt.completed ? "已补上释义" : receipt.inserted ? "已记下" : "已记过";
             receipt_until_ = Clock::now() + std::chrono::seconds(2);
         }
         std::deque<Reply> ready;

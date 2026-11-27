@@ -15,7 +15,7 @@ from . import electron_panel, native_overlay, themes
 from .core import Service, TOKENS, display_text
 from .electron_pipe import ElectronPipe, PipeClosed, ProtocolError
 from .game_session import GameSession
-from .notes import Notebook
+from .notes import CaptureResult, Notebook
 from .patching import save_json
 
 WORLD = "BilingualWorkbench"
@@ -136,10 +136,12 @@ class Library:
             return meaning
         kind = ("phrase" if " " in target_key else "word") if target else "sentence"
         snapshot = dict(row, en=original, zh=self._shown(row, "zh"))
-        created = self.notebook.capture(snapshot, self.title, kind, target or original,
+        result = self.notebook.capture(snapshot, self.title, kind, target or original,
                                         target_key, meaning.get("meaning", ""),
                                         meaning.get("source", "原句注释" if meaning else ""))
-        return dict(saved=created)
+        if result == CaptureResult.COMPLETED:
+            return dict(saved=False, completed=True)
+        return dict(saved=result == CaptureResult.CREATED)
 
 
 class GamePage:

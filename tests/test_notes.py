@@ -67,3 +67,25 @@ class NotesTests(unittest.TestCase):
             self.save("word", "run")
         self.assertEqual(self.book.get(original_id)["target_key"], "run")
         self.assertEqual(self.book.get(original_id)["personal_note"], "原平台备注")
+
+    def test_explicit_resave_enriches_only_missing_vocabulary(self):
+        for i, (kind, target, missing, source) in enumerate([
+            ("word", "Run", "", ""),
+            ("phrase", "Run fast", "本地词典暂无对应释义", "未收录"),
+        ]):
+            with self.subTest(kind=kind):
+                entry = dict(self.entry, id=f"missing-{i}")
+                def save(meaning, origin):
+                    return self.book.capture(entry, "示例游戏", kind, target, target.lower(), meaning, origin)
+
+                self.assertTrue(save(missing, source))
+                note_id = next(row["id"] for row in self.book.listing()[1] if row["kind"] == kind)
+                self.book.save_remark(note_id, "自己写的备注")
+                original = dict(self.book.get(note_id))
+                self.assertFalse(save("还是没有释义", "未收录"))
+                self.assertTrue(save("新释义", "离线词典"))
+                self.assertEqual(dict(self.book.get(note_id)),
+                                 dict(original, meaning="新释义", meaning_source="离线词典"))
+                self.assertFalse(save("不要覆盖", "第二部词典"))
+                self.assertEqual(self.book.get(note_id)["meaning"], "新释义")
+                self.assertEqual(len(self.book.listing()[1]), i + 1)

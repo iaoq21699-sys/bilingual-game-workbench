@@ -160,6 +160,44 @@ class DesktopLearningTests(unittest.TestCase):
         a.hide()
         session.restore_focus.assert_called_once_with()
 
+    def test_dictionary_import_and_resave_reveals_definition_in_the_original_card(self):
+        a = self.app
+        a.game_picker.current(a.game_ids.index(self.gid))
+        a._game_selected()
+        a.query.set("quiet")
+        term = "quiet path"
+        self._wait(lambda: a.current_entry and a.current_entry["key"] == "two")
+        a.lookup_query.set(term)
+        a._lookup()
+        self._wait(lambda: a.lookup_note and a.lookup_note[1] == term and not a.lookup_note[3])
+        a.save_term_button.invoke()
+        self._wait(lambda: not a.note_busy)
+        book = Notebook(self.service.data_dir)
+        original, = book.listing(self.gid)[1]
+        book.save_remark(original["id"], "下次复习")
+        csv = self.base / "little-dictionary.csv"
+        csv.write_text("word,translation\nquiet path,僻静小径\n", encoding="utf-8")
+        with patch("bilingual.ui.filedialog.askopenfilename", return_value=str(csv)), \
+                patch("bilingual.ui.messagebox.showinfo") as imported:
+            a._import_dictionary()
+            self._wait(lambda: imported.called and a.current_entry and a.current_entry["key"] == "two")
+        a.lookup_query.set(term)
+        a._lookup()
+        self._wait(lambda: a.lookup_note and a.lookup_note[3] == "僻静小径")
+        a.save_term_button.invoke()
+        self._wait(lambda: not a.note_busy)
+        self.assertIn("已为原收藏补上释义", a.status.get())
+        updated, = book.listing(self.gid)[1]
+        self.assertEqual(dict(original), dict(updated))
+        a._open_notes()
+        n = a.notes_window
+        self.assertEqual(n.current["id"], original["id"])
+        self.assertEqual(n.current["personal_note"], "下次复习")
+        n.review_toggle.invoke()
+        self.assertNotIn("僻静小径", n.detail.get("1.0", "end"))
+        n.reveal_button.invoke()
+        self.assertIn("僻静小径", n.detail.get("1.0", "end"))
+
     def test_failed_desktop_return_keeps_the_hint_visible_and_second_escape_hides(self):
         a = self.app
         session = Mock()

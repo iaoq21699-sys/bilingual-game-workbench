@@ -18,6 +18,7 @@ struct Note {
 struct Receipt {
     Note note;
     bool inserted = false;
+    bool completed = false;
     std::string error;
 };
 

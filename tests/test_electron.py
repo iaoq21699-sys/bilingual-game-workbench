@@ -192,6 +192,28 @@ class ElectronTests(unittest.TestCase):
         self.assertCountEqual([(row["kind"], row["target_key"], row["meaning"]) for row in rows],
                               [("sentence", "", ""), ("word", "run", "跑开")] * 2)
 
+    def test_f8_resave_completes_an_existing_unlisted_term(self):
+        from bilingual.electron_runtime import Library
+        from bilingual.notes import Notebook
+        corpus = self.base / "rare-term.json"
+        corpus.write_text(self.json([dict(key="latch", en="Hold the glimlatch.", zh="扶住微光闩。")]),
+                          encoding="utf-8")
+        gid = self.service.import_file(corpus, "短句样本")["id"]
+        library = Library(self.service, dict(id=gid, title="短句样本", pairs=[]))
+        entry, = library.handle(dict(action="search", query="glimlatch"))["items"]
+        request = dict(action="note", entry=entry["id"], term="glimlatch")
+        self.assertEqual(library.handle(request), {"saved": True})
+        book = Notebook(self.service.data_dir)
+        row, = book.listing(gid)[1]
+        self.assertEqual(book.get(row["id"])["meaning_source"], "未收录")
+        csv = self.base / "little-dictionary.csv"
+        csv.write_text("word,translation\nglimlatch,微光闩\n", encoding="utf-8")
+        self.service.import_dictionary(csv)
+        self.assertEqual(library.handle(request), {"saved": False, "completed": True})
+        self.assertEqual(library.handle(request), {"saved": False})
+        self.assertEqual(len(book.listing(gid)[1]), 1)
+        self.assertEqual(book.get(row["id"])["meaning"], "微光闩")
+
     def test_renderer_and_desktop_share_saved_appearance(self):
         from bilingual import native_overlay, themes
         from bilingual.electron_runtime import Library

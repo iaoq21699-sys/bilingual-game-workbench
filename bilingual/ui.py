@@ -14,7 +14,7 @@ from tkinter import font as tkfont
 from .hotkey import GlobalHotkey
 from .game_session import GameSession
 from .core import display_text
-from .notes import Notebook, note_key
+from .notes import CaptureResult, Notebook, note_key
 from .ui_design import (BG, PANEL, SURFACE, INK, MUTED, ACCENT, LINE, WARN, FONT,
                         ENGLISH_FONT, PAPER, PAPER_INK, PAPER_MUTED, PAPER_ACCENT, PAPER_MARK,
                         apply_styles, book_mark, tooltip)
@@ -961,10 +961,14 @@ class Desktop:
         self.note_busy = True
         self._note_buttons()
 
-        def finished(created):
+        def finished(result):
             self.note_busy = False
             self._note_buttons()
-            self.status.set("已收藏，可在「收藏与复习」查看。" if created else "这条内容已在收藏中。")
+            self.status.set({
+                CaptureResult.CREATED: "已收藏，可在「收藏与复习」查看。",
+                CaptureResult.COMPLETED: "已为原收藏补上释义。",
+                CaptureResult.DUPLICATE: "这条内容已在收藏中。",
+            }[result])
 
         def failed(error):
             self.note_busy = False

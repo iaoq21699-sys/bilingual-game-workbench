@@ -40,7 +40,28 @@ void free_legacy_sentence_key(sqlite3* db, const Note& note) {
     if (result != SQLITE_DONE) check(db, result);
 }
 
-bool insert(const std::string& path, const Note& note) {
+bool complete_definition(sqlite3* db, const Note& note) {
+    sqlite3_stmt* stmt = nullptr;
+    const auto rc = sqlite3_prepare_v2(db, R"sql(
+        UPDATE notes SET meaning=?4, meaning_source=?5
+        WHERE game_id=?1 AND entry_id=?2 AND target_key=?3
+          AND kind IN ('word','phrase')
+          AND (trim(meaning)='' OR meaning_source='未收录')
+          AND trim(?4)<>'' AND ?5<>'未收录'
+    )sql", -1, &stmt, nullptr);
+    std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> owned(stmt, sqlite3_finalize);
+    check(db, rc);
+    int index = 1;
+    for (const auto* field : {&note.game_id, &note.entry_id, &note.target_key, &note.meaning, &note.meaning_source})
+        bind_text(db, stmt, index++, *field);
+    const auto result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) check(db, result);
+    return sqlite3_changes(db) == 1;
+}
+
+enum class CaptureResult { Duplicate, Created, Completed };
+
+CaptureResult capture(const std::string& path, const Note& note) {
     sqlite3* raw = nullptr;
     int rc = sqlite3_open_v2(path.c_str(), &raw, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
     std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> db(raw, sqlite3_close_v2);
@@ -65,6 +86,10 @@ bool insert(const std::string& path, const Note& note) {
         // Both statements must commit together; closing on failure rolls back.
         check(raw, sqlite3_exec(raw, "BEGIN IMMEDIATE", nullptr, nullptr, nullptr));
         free_legacy_sentence_key(raw, note);
+        if (complete_definition(raw, note)) {
+            check(raw, sqlite3_exec(raw, "COMMIT", nullptr, nullptr, nullptr));
+            return CaptureResult::Completed;
+        }
     }
 
     sqlite3_stmt* statement = nullptr;
@@ -90,7 +115,7 @@ bool insert(const std::string& path, const Note& note) {
     if (rc != SQLITE_DONE) check(raw, rc);
     const bool inserted = sqlite3_changes(raw) == 1;
     if (!sentence) check(raw, sqlite3_exec(raw, "COMMIT", nullptr, nullptr, nullptr));
-    return inserted;
+    return inserted ? CaptureResult::Created : CaptureResult::Duplicate;
 }
 } // namespace
 
@@ -130,7 +155,11 @@ void NoteWriter::run() {
             queue_.pop_front();
             writing_ = true;
         }
-        try { receipt.inserted = insert(path_, receipt.note); }
+        try {
+            const auto result = capture(path_, receipt.note);
+            receipt.inserted = result == CaptureResult::Created;
+            receipt.completed = result == CaptureResult::Completed;
+        }
         catch (const std::exception& e) { receipt.error = e.what(); }
         {
             std::lock_guard lock(mutex_);

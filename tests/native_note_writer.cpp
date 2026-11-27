@@ -79,7 +79,44 @@ int main(int argc, char** argv) try {
     std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> finish(stmt, sqlite3_finalize);
     if (prepared != SQLITE_OK || sqlite3_step(stmt) != SQLITE_ROW || sqlite3_column_int(stmt, 0) != 2)
         throw std::runtime_error("Legacy remark or short-word meaning was lost");
-    std::cout << "Write failure, retry, duplicate receipt, concurrent shutdown and legacy short-line collision exercised.\n";
+    finish.reset();
+    note.entry_id="missing"; note.meaning="本地词典暂无对应释义"; note.meaning_source="未收录";
+    note.saved_at_ms=42;
+    writer.submit(note);
+    writer.flush();
+    auto missing = writer.take_receipts();
+    if (missing.size()!=1 || !missing[0].inserted || missing[0].completed || !missing[0].error.empty())
+        throw std::runtime_error("Could not seed the unlisted word");
+    sqlite3_int64 original_id=0;
+    if (sqlite3_exec(raw, "UPDATE notes SET personal_note='keep this too' WHERE entry_id='missing'",
+                     nullptr, nullptr, nullptr) != SQLITE_OK ||
+        sqlite3_exec(raw, "SELECT id FROM notes WHERE entry_id='missing'",
+                     [](void* out,int,char** values,char**) {
+                         *static_cast<sqlite3_int64*>(out)=std::stoll(values[0]); return 0;
+                     }, &original_id, nullptr) != SQLITE_OK || !original_id)
+        throw std::runtime_error("Could not set the original word remark");
+    writer.submit(note);
+    note.meaning="离开"; note.meaning_source="离线词典"; note.saved_at_ms=100;
+    writer.submit(note);
+    note.meaning="不要覆盖";
+    writer.submit(note);
+    writer.flush();
+    auto complete = writer.take_receipts();
+    if (complete.size()!=3 || complete[0].completed || !complete[1].completed || complete[2].completed)
+        throw std::runtime_error("Unexpected completion receipts");
+    for (const auto& receipt : complete) {
+        if (receipt.inserted || !receipt.error.empty())
+            throw std::runtime_error("Completion created a duplicate or returned an error");
+    }
+    prepared = sqlite3_prepare_v2(raw, R"sql(
+        SELECT id FROM notes WHERE entry_id='missing' AND meaning='离开' AND meaning_source='离线词典'
+            AND personal_note='keep this too' AND saved_at_ms=42
+    )sql", -1, &stmt, nullptr);
+    finish.reset(stmt);
+    if (prepared != SQLITE_OK || sqlite3_step(stmt) != SQLITE_ROW ||
+        sqlite3_column_int64(stmt,0) != original_id || sqlite3_step(stmt) != SQLITE_DONE)
+        throw std::runtime_error("Existing vocabulary card did not retain identity, age, or remark");
+    std::cout << "Write failure, retry, duplicate receipt, concurrent shutdown, legacy short-line collision, and vocabulary completion exercised.\n";
     return 0;
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';
